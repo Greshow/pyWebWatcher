@@ -33,8 +33,8 @@ async def get_page_hash(session, url):
 def send_email(subject, body, email_config):
     try:
         msg = MIMEText(body, "plain", "utf-8")
-        msg["From"] = formataddr(("监控系统", email_config["sender_email"]))
-        msg["To"] = formataddr(("接收人", email_config["recipient_email"]))
+        msg["From"] = email_config["sender_email"]
+        msg["To"] = email_config["recipient_email"]
         msg["Subject"] = subject
 
         with smtplib.SMTP_SSL(email_config["smtp_server"], email_config["smtp_port"]) as server:
