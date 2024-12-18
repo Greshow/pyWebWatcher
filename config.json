@@ -1,0 +1,11 @@
+{
+  "monitored_directory": "D:\\Tmp\\web",
+  "file_types": [".php", ".txt"],
+  "email_config": {
+    "smtp_server": "smtp.qq.com",
+    "smtp_port": 587,
+    "sender_email": "10001@qq.com",
+    "sender_password": "password",
+    "recipient_email": "subscriber@qq.com"
+  }
+}
