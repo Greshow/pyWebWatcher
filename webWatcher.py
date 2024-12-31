@@ -8,6 +8,7 @@ import argparse
 import json
 import asyncio
 import aiohttp
+import os
 
 # 加载 JSON 配置文件
 def load_config(config_file):
@@ -78,20 +79,46 @@ async def monitor_website(session, target_url, last_hashes, check_interval, emai
 
         await asyncio.sleep(check_interval)
 
+# 检查目标文件是否被修改
+async def check_target_file_modification(target_file, last_modification_time):
+    while True:
+        current_modification_time = os.path.getmtime(target_file)
+        if current_modification_time != last_modification_time:
+            print(f"[监控] 检测到 {target_file} 文件被修改")
+            last_modification_time = current_modification_time
+            return True, last_modification_time
+        await asyncio.sleep(5)  # 每 5 秒检查一次文件修改时间
+
 # 主程序
 async def monitor_websites(target_file, check_interval, email_config):
+    last_modification_time = os.path.getmtime(target_file)  # 记录文件的最后修改时间
     target_urls = load_target_urls(target_file)
     if not target_urls:
         print("[监控] 没有有效的 URL 需要监控。")
         return
 
     last_hashes = {url: None for url in target_urls}
-    async with aiohttp.ClientSession() as session:
-        tasks = []
-        for target_url in target_urls:
-            tasks.append(monitor_website(session, target_url, last_hashes, check_interval, email_config))
+    tasks = {}  # 用于存储每个 URL 对应的监控任务
 
-        await asyncio.gather(*tasks)
+    async with aiohttp.ClientSession() as session:
+        while True:
+            # 检查文件是否被修改
+            file_modified, last_modification_time = await check_target_file_modification(target_file, last_modification_time)
+            if file_modified:
+                new_target_urls = load_target_urls(target_file)
+                # 停止已删除的 URL 的监控任务
+                for url in list(tasks.keys()):
+                    if url not in new_target_urls:
+                        tasks[url].cancel()
+                        del tasks[url]
+                        del last_hashes[url]
+                        print(f"[监控] 停止监控 {url}")
+                # 启动新增的 URL 的监控任务
+                for url in new_target_urls:
+                    if url not in tasks:
+                        tasks[url] = asyncio.create_task(monitor_website(session, url, last_hashes, check_interval, email_config))
+                        print(f"[监控] 开始监控 {url}")
+            await asyncio.sleep(60)
 
 # 命令行参数解析
 def parse_args():
@@ -127,3 +154,4 @@ if __name__ == "__main__":
 
     # 启动监控
     asyncio.run(monitor_websites(args.target, check_interval, email_config))
+    
