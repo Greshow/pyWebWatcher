@@ -1,6 +1,6 @@
 {
   "monitor": {
-    "check_interval": 10
+    "check_interval": 3600
   },
   "email": {
     "smtp_server": "smtp.qq.com",
