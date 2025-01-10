@@ -1,0 +1,12 @@
+{
+  "monitor": {
+    "check_interval": 10
+  },
+  "email": {
+    "smtp_server": "smtp.qq.com",
+    "smtp_port": 465,
+    "sender_email": "******@qq.com",
+    "sender_password": "******",
+    "recipient_email": "******@nsfocus.net"
+  }
+}
