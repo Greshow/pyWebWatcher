@@ -98,7 +98,7 @@ async def check_target_file_modification(target_file, last_modification_time):
             print(f"[监控] 检测到 {target_file} 文件被修改")
             last_modification_time = current_modification_time
             return True, last_modification_time
-        await asyncio.sleep(5)  # 每 5 秒检查一次文件修改时间
+        await asyncio.sleep(300)  # 每 5 秒检查一次文件修改时间
 
 # 主程序
 async def monitor_websites(target_file, check_interval, email_config):
